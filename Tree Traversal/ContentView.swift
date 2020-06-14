@@ -21,26 +21,29 @@ struct Tree<A> {
 // Define binaryTree
 let binaryTree = Tree<Int>(50, children: [
     Tree(17, children: [
-    Tree(12),
+    Tree(12, children: [Tree(35), Tree(41)]),
     Tree(23)
     ]),
     Tree(72, children: [
     Tree(54),
-    Tree(91)
+    Tree(91, children: [Tree(19)])
     ])
 ])
 
+// Transform Tree<Int> to Tree <Int<Unique>>
 extension Tree {
     func map<B>(_ transform: (A) -> B) -> Tree<B> {
         return Tree<B>(transform(value), children: children.map({ $0.map(transform) }))
     }
 }
 
+// Make each node uniquely identifiable
 class Unique<A>: Identifiable {
     let value: A
     init(_ value: A) { self.value = value }
 }
 
+// Hash table to store center points for each node
 struct CollectDict<Key: Hashable, Value>: PreferenceKey {
     static var defaultValue: [Key:Value] { [:] }
     static func reduce(value: inout [Key:Value], nextValue: () -> [Key:Value]) {
@@ -59,17 +62,10 @@ struct RoundedCircleStyle: ViewModifier {
     }
 }
 
-// Lines connecting nodes
+// Draw edges connecting nodes
 struct Line: Shape {
     var from: CGPoint
     var to: CGPoint
-    var animatableData: AnimatablePair<CGPoint, CGPoint> {
-        get { AnimatablePair(from, to) }
-        set {
-            from = newValue.first
-            to = newValue.second
-        }
-    }
 
     func path(in rect: CGRect) -> Path {
         Path { p in
@@ -114,9 +110,27 @@ struct Diagram<A: Identifiable, V: View>: View {
 struct ContentView: View {
     @State var tree: Tree<Unique<Int>> = binaryTree.map(Unique.init)
     var body: some View {
-        Diagram(tree: tree, node: {
-            value in Text("\(value.value)").modifier(RoundedCircleStyle())
-        })
+        VStack {
+            Text("Select a node")
+                .font(.title)
+            
+            Spacer()
+            
+            Diagram(tree: tree, node: {
+                value in Text("\(value.value)").modifier(RoundedCircleStyle())
+            })
+            
+            Spacer()
+            
+            HStack{
+                Text("Depth: ")
+                    .font(.subheadline)
+                    .bold()
+                Text(" ")
+                    .font(.subheadline)
+                    .bold()
+            }.padding()
+        }.padding()
     }
 }
 
