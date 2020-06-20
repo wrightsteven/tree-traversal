@@ -107,6 +107,19 @@ struct Diagram<A: Identifiable, V: View>: View {
     }
 }
 
+// Round button style for nodes
+struct CircleStyle: ButtonStyle{
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View{
+        Circle()
+            .overlay(Circle()
+                .stroke(lineWidth:2)
+                .padding(10)
+        )
+            .overlay(configuration.label)
+            .frame(width: 50, height: 50)
+    }
+}
+
 struct ContentView: View {
     @State var tree: Tree<Unique<Int>> = binaryTree.map(Unique.init)
     var body: some View {
@@ -116,9 +129,20 @@ struct ContentView: View {
             
             Spacer()
             
-            Diagram(tree: tree, node: {
+            /*Diagram(tree: tree, node: {
                 value in Text("\(value.value)").modifier(RoundedCircleStyle())
-            })
+            })*/
+            
+            Diagram(tree: tree, node: {
+            value in
+            Button(action: {
+                print("Delete tapped!")
+            }) {
+                    Text("\(value.value)")
+                }
+            }
+            .buttonStyle(CircleStyle())
+            )
             
             Spacer()
             
